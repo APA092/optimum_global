@@ -23,5 +23,14 @@ def main():
             store[i][j] = solver.NumVar(0, solver.infinity(), 'store')
     print len(buy)
     
+    #create objective
+    objective = solver.Objective()
+    for i in range(0, len(buy)):
+        for j in range(0, len(buy[0])):
+            objective.SetCoefficient(buy[i][j], data[i][j]*(-1))
+            objective.SetCoefficient(produce[i][j],150)
+            objective.SetCoefficient(store[i][j], -5)
+    objective.SetMaximization()
+    
 if __name__ == '__main__':
   main()
