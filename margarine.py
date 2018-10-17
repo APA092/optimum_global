@@ -9,6 +9,8 @@ def main():
             [90, 100, 140, 80, 135]
         ];
         
+    char = [8.8, 6.1, 2, 4.2, 5];
+        
     solver = pywraplp.Solver('Linear_test', pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
         
 #create variables
@@ -19,7 +21,7 @@ def main():
     for i in range(0, len(data)):
         for j in range(0, len(data[0])):
             buy[i][j] = solver.NumVar(0, solver.infinity(), 'buy')
-            produce[i][j] = solver.NumVar(0, 600, 'produce')
+            produce[i][j] = solver.NumVar(0, solver.infinity(), 'produce')
             store[i][j] = solver.NumVar(0, solver.infinity(), 'store')
    
 #create objective
@@ -87,9 +89,39 @@ def main():
             constraint7[i][j].SetCoefficient(store[i][j],-1)
             constraint7[i][j].SetCoefficient(buy[i][j],1)
             constraint7[i][j].SetCoefficient(produce[i][j],-1)
+    
+    #products characteristics HIGH
+    constraint7 = [0]*len(produce)
+    for i in range(0, len(produce)):
+        constraint7[i] = solver.Constraint(-solver.infinity(), 0)
+        for j in range(0, len(produce[0])):
+            constraint7[i].SetCoefficient(produce[i][j], char[j]-6)
+
+    #products characteristics HIGH
+    constraint8 = [0]*len(produce)
+    for i in range(0, len(produce)):
+        constraint8[i] = solver.Constraint(0, solver.infinity())
+        for j in range(0, len(produce[0])):
+            constraint8[i].SetCoefficient(produce[i][j], char[j]-3)
             
     solver.Solve()
+    storage_cost = 0
+    revenue = 0
+    purchase_cost =0
     
+    for i in range(0, len(produce)):
+        for j in range(0, len(produce[0])):
+            purchase_cost += data[i][j]*buy[i][j].solution_value()
+            revenue += 150*produce[i][j].solution_value()
+            storage_cost += 5*store[i][j].solution_value()
+    
+
+    profit = revenue - storage_cost - purchase_cost
+    
+    print "Profit - " + str(profit)
+    print "Revenue - " + str(revenue)
+    print "Storage Cost - " + str(storage_cost)
+    print "Purchase Cost - " + str(purchase_cost)
     print '***************'
     print 'Production Plan'
     print '***************'
