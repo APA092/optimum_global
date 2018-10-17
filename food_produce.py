@@ -37,15 +37,15 @@ def main():
     #production not higher than capacity of machine 1
     constraint1 = [0]*len(produce)
     for i in range(0, 6):
-        constraint1[i] = solver.Constraint(0, 250)
-        for j in range(0, 3):
+        constraint1[i] = solver.Constraint(0, 200)
+        for j in range(0, 2):
             constraint1[i].SetCoefficient(produce[i][j],1)
     
     #production not higher than capacity of machine 2
     constraint2 = [0]*len(produce)
     for i in range(0, 6):
-        constraint2[i] = solver.Constraint(0, 200)
-        for j in range(3, 5):
+        constraint2[i] = solver.Constraint(0, 250)
+        for j in range(2, 5):
             constraint2[i].SetCoefficient(produce[i][j],1)
             
     #production not higher than resources available
@@ -57,11 +57,11 @@ def main():
             constraint3[i][j].SetCoefficient(store[i][j], 1)
             constraint3[i][j].SetCoefficient(buy[i][j], 1)
             
-    #storage limited to 500 units
+    #storage limited to 1000 units
     constraint4 = [[0 for x in range(len(data[0]))] for y in range(len(data))]        
     for i in range(0, len(produce)):
         for j in range(0, len(produce[0])):    
-            constraint4[i][j] = solver.Constraint(0, 500)
+            constraint4[i][j] = solver.Constraint(0, 1000)
             constraint4[i][j].SetCoefficient(store[i][j], 1)
             
     #initial storage
@@ -89,7 +89,7 @@ def main():
             constraint7[i][j].SetCoefficient(store[i][j],-1)
             constraint7[i][j].SetCoefficient(buy[i][j],1)
             constraint7[i][j].SetCoefficient(produce[i][j],-1)
-    
+            
     #products characteristics HIGH
     constraint7 = [0]*len(produce)
     for i in range(0, len(produce)):
@@ -97,12 +97,15 @@ def main():
         for j in range(0, len(produce[0])):
             constraint7[i].SetCoefficient(produce[i][j], char[j]-6)
 
-    #products characteristics HIGH
+    #products characteristics LOW
     constraint8 = [0]*len(produce)
     for i in range(0, len(produce)):
         constraint8[i] = solver.Constraint(0, solver.infinity())
         for j in range(0, len(produce[0])):
             constraint8[i].SetCoefficient(produce[i][j], char[j]-3)
+            
+    
+
             
     solver.Solve()
     storage_cost = 0
