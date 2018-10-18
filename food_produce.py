@@ -9,7 +9,7 @@ def main():
             [90, 100, 140, 80, 135]
         ];
         
-    char = [8.8, 6.1, 2, 4.2, 5];
+    char = [8.8, 6.1, 2.0, 4.2, 5.0];
         
     solver = pywraplp.Solver('Linear_test', pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
         
@@ -26,8 +26,8 @@ def main():
    
 #create objective
     objective = solver.Objective()
-    for i in range(0, len(buy)):
-        for j in range(0, len(buy[0])):
+    for i in range(0, len(data)):
+        for j in range(0, len(data[0])):
             objective.SetCoefficient(buy[i][j], data[i][j]*(-1))
             objective.SetCoefficient(produce[i][j], 150)
             objective.SetCoefficient(store[i][j], -5)
@@ -48,14 +48,14 @@ def main():
         for j in range(2, 5):
             constraint2[i].SetCoefficient(produce[i][j],1)
             
-    #production not higher than resources available
+    #storage is always positive
     constraint3 = [[0 for x in range(len(data[0]))] for y in range(len(data))]
     for i in range(0, len(produce)):
         for j in range(0, len(produce[0])):
             constraint3[i][j] = solver.Constraint(0, solver.infinity())
-            constraint3[i][j].SetCoefficient(produce[i][j], -1)
             constraint3[i][j].SetCoefficient(store[i][j], 1)
-            constraint3[i][j].SetCoefficient(buy[i][j], 1)
+      
+          
             
     #storage limited to 1000 units
     constraint4 = [[0 for x in range(len(data[0]))] for y in range(len(data))]        
@@ -71,7 +71,7 @@ def main():
         constraint5[i].SetCoefficient(store[0][i],1)
         constraint5[i].SetCoefficient(buy[0][i],-1)
         constraint5[i].SetCoefficient(produce[0][i],1)
-    
+
     #final storage
     constraint6 = [0]*len(store[0])
     for i in range(0, len(store[0])):
@@ -79,30 +79,31 @@ def main():
         constraint6[i].SetCoefficient(store[4][i],1)
         constraint6[i].SetCoefficient(buy[5][i],1)
         constraint6[i].SetCoefficient(produce[5][i],-1)
-    
+
     #linking storage and production
     constraint7 = [[0 for x in range(len(data[0]))] for y in range(len(data))]
-    for i in range(1,6):
+    for i in range(1,len(data)):
         for j in range(0,len(data[0])):
             constraint7[i][j] = solver.Constraint(0, 0)
             constraint7[i][j].SetCoefficient(store[i-1][j],1)
             constraint7[i][j].SetCoefficient(store[i][j],-1)
             constraint7[i][j].SetCoefficient(buy[i][j],1)
             constraint7[i][j].SetCoefficient(produce[i][j],-1)
-            
-    #products characteristics HIGH
-    constraint7 = [0]*len(produce)
-    for i in range(0, len(produce)):
-        constraint7[i] = solver.Constraint(-solver.infinity(), 0)
-        for j in range(0, len(produce[0])):
-            constraint7[i].SetCoefficient(produce[i][j], char[j]-6)
+        
 
-    #products characteristics LOW
+    #products characteristics HIGH
     constraint8 = [0]*len(produce)
     for i in range(0, len(produce)):
-        constraint8[i] = solver.Constraint(0, solver.infinity())
+        constraint8[i] = solver.Constraint(-solver.infinity(), 0)
         for j in range(0, len(produce[0])):
-            constraint8[i].SetCoefficient(produce[i][j], char[j]-3)
+            constraint8[i].SetCoefficient(produce[i][j], char[j]-6)
+
+    #products characteristics LOW
+    constraint9 = [0]*len(produce)
+    for i in range(0, len(produce)):
+        constraint9[i] = solver.Constraint(0, solver.infinity())
+        for j in range(0, len(produce[0])):
+            constraint9[i].SetCoefficient(produce[i][j], char[j]-3)
             
     
 
@@ -154,7 +155,7 @@ def main():
         str(buy[i][2].solution_value()) + ' '+  \
         str(buy[i][3].solution_value()) + ' ' +  \
         str(buy[i][4].solution_value())
-        
+  
         
 if __name__ == '__main__':
   main()
